@@ -1,0 +1,53 @@
+version: '3'
+services:
+  app:
+    image: kgs-app
+    container_name: app
+    build:
+      context: .
+      dockerfile: docker/app.dockerfile
+    volumes:
+      - .:/var/www
+    environment:
+      XDEBUG_CONFIG: "remote_host=docker.for.mac.localhost remote_enable=1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    env_file:
+      - .env
+    working_dir: /var/www
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - data-redis:/data
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: docker/web.dockerfile
+    working_dir: /var/www
+    depends_on:
+      - app
+    volumes:
+      - .:/var/www
+    ports:
+      - 8081:80
+  worker:
+    image: kgs-worker
+    build:
+      context: .
+      dockerfile: docker/worker.dockerfile
+    container_name: worker
+    working_dir: /var/www
+    depends_on:
+      - app
+    volumes:
+      - .:/var/www
+    env_file:
+      - .env
+
+volumes:
+  data-redis:
+    driver: "local"
+

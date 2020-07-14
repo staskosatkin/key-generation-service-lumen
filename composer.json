@@ -6,10 +6,10 @@
     "type": "project",
     "require": {
         "php": "^7.4",
+        "ext-pdo": "*",
         "illuminate/redis": "^7.19",
         "laravel/lumen-framework": "^7.0",
-        "predis/predis": "^1.1",
-      "ext-pdo": "*"
+        "predis/predis": "^1.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

@@ -2,8 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\DeliverHashJob;
 use App\Services\KeyManager;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 class DeliverHash extends Command
 {
@@ -22,22 +24,14 @@ class DeliverHash extends Command
     public function handle()
     {
         $amount = $this->ask('Amount', 100);
+        $iterations = $this->ask('Iterations', 1);
 
-        $start = microtime(true);
+        // dispatch Job
+        Collection::times($iterations, function () use ($amount) {
+            dispatch(new DeliverHashJob($amount));
+        });
 
-        $keys = $this->keyManager->fetchHash($amount);
 
-        $finish = microtime(true);
-        $duration = $finish - $start;
-
-        $speed = $amount / $duration;
-
-        collect($keys)->each(fn ($hash) => $this->info($hash));
-
-        $this->info('Process Finished');
-
-        $this->table(['Amount', 'Duration', 'Speed'], [
-            [$amount, $duration, $speed],
-        ]);
+        $this->info('Job queued');
     }
 }
